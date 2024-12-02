@@ -1,32 +1,44 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $name = htmlspecialchars(trim($_POST['name']));
-    $email = htmlspecialchars(trim($_POST['email']));
-    $password = password_hash(trim($_POST['password']), PASSWORD_DEFAULT);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Get the form data
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    $phone = $_POST['phone'];
 
-    $user = array(
-        'name' => $name,
-        'email' => $email,
-        'password' => $password
-    );
+    // Simple validation
+    if (empty($username) || empty($email) || empty($password)) {
+        echo 'All fields are required!';
+        exit;
+    }
 
-    $file = 'users.json';
-    if (file_exists($file)) {
-        $users = json_decode(file_get_contents($file), true);
+    // Hash the password
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    // Database connection (replace with your own)
+    $servername = "localhost";
+    $username_db = "root"; // your db username
+    $password_db = ""; // your db password
+    $dbname = "your_database_name";
+
+    // Create connection
+    $conn = new mysqli($servername, $username_db, $password_db, $dbname);
+
+    // Check connection
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    // Insert data into the database
+    $sql = "INSERT INTO users (username, email, password, phone) VALUES ('$username', '$email', '$hashedPassword', '$phone')";
+
+    if ($conn->query($sql) === TRUE) {
+        echo 'success';
     } else {
-        $users = array();
+        echo 'Error: ' . $conn->error;
     }
 
-    foreach ($users as $u) {
-        if ($u['email'] === $email) {
-            echo 'User already exists';
-            exit;
-        }
-    }
-
-    $users[] = $user;
-    file_put_contents($file, json_encode($users));
-
-    echo 'success';
+    // Close connection
+    $conn->close();
 }
 ?>

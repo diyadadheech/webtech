@@ -1,44 +1,44 @@
 <?php
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get the form data
-    $username = $_POST['username'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
-    $phone = $_POST['phone'];
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-    // Simple validation
-    if (empty($username) || empty($email) || empty($password)) {
-        echo 'All fields are required!';
-        exit;
-    }
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Database connection details
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "user_registration";
+
+    // Collect form data
+    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+    $userPassword = $_POST['password'];
+    $name = htmlspecialchars($_POST['name']);
+    $phone = htmlspecialchars($_POST['phone']);
 
     // Hash the password
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-    // Database connection (replace with your own)
-    $servername = "localhost";
-    $username_db = "root"; // your db username
-    $password_db = ""; // your db password
-    $dbname = "your_database_name";
+    $hashedPassword = password_hash($userPassword, PASSWORD_DEFAULT);
 
     // Create connection
-    $conn = new mysqli($servername, $username_db, $password_db, $dbname);
+    $conn = new mysqli($servername, $username, $password, $dbname);
 
     // Check connection
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
 
-    // Insert data into the database
-    $sql = "INSERT INTO users (username, email, password, phone) VALUES ('$username', '$email', '$hashedPassword', '$phone')";
+    // SQL query to insert the user data into the database
+    $stmt = $conn->prepare("INSERT INTO users (email, password, name, phone) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("ssss", $email, $hashedPassword, $name, $phone);
 
-    if ($conn->query($sql) === TRUE) {
-        echo 'success';
+    if ($stmt->execute()) {
+        echo "Registration successful!";
+        header("Location: login.html");
+        exit();
     } else {
-        echo 'Error: ' . $conn->error;
+        echo "Error: " . $stmt->error;
     }
 
-    // Close connection
+    $stmt->close();
     $conn->close();
 }
 ?>

@@ -4,16 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Form</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h2>Registration Form</h2>
         <form id="registrationForm" action="register.php" method="POST">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
-
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>
 
@@ -23,17 +19,53 @@
             <label for="confirmPassword">Confirm Password:</label>
             <input type="password" id="confirmPassword" name="confirmPassword" required>
 
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" name="name" required>
+
             <label for="phone">Phone Number:</label>
-            <input type="text" id="phone" name="phone">
+            <input type="text" id="phone" name="phone" required>
 
-            <input type="submit" value="Register">
+            <button type="submit">Register</button>
         </form>
-
-        <div id="loginRedirect" style="display:none;">
-            <p>Registration successful! <a href="login.html">Click here</a> to login.</p>
-        </div>
+        <p>Already have an account? <a href="login.html">Login</a></p>
     </div>
 
-    <script src="script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#registrationForm").on("submit", function (event) {
+                var email = $("#email").val();
+                var password = $("#password").val();
+                var confirmPassword = $("#confirmPassword").val();
+                var phone = $("#phone").val();
+                
+                var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (!emailRegex.test(email)) {
+                    alert("Please enter a valid email.");
+                    event.preventDefault();
+                    return;
+                }
+
+                if (password.length < 6) {
+                    alert("Password must be at least 6 characters long.");
+                    event.preventDefault();
+                    return;
+                }
+
+                if (password !== confirmPassword) {
+                    alert("Passwords do not match.");
+                    event.preventDefault();
+                    return;
+                }
+
+                var phoneRegex = /^[0-9]{10}$/;
+                if (!phoneRegex.test(phone)) {
+                    alert("Please enter a valid 10-digit phone number.");
+                    event.preventDefault();
+                    return;
+                }
+            });
+        });
+    </script>
 </body>
 </html>

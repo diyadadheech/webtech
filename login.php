@@ -1,23 +1,29 @@
 <?php
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $email = htmlspecialchars(trim($_POST['email']));
-    $password = trim($_POST['password']);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = $_POST['email'];
+    $password = $_POST['password'];
 
-    $file = 'users.json';
-    if (file_exists($file)) {
-        $users = json_decode(file_get_contents($file), true);
-    } else {
-        echo 'fail';
-        exit;
+    // Database connection
+    $conn = new mysqli("localhost", "root", "", "your_database_name");
+
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
     }
 
-    foreach ($users as $u) {
-        if ($u['email'] === $email && password_verify($password, $u['password'])) {
-            echo 'success';
-            exit;
+    $sql = "SELECT * FROM users WHERE email = '$email'";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        if (password_verify($password, $row['password'])) {
+            echo "Login successful!";
+        } else {
+            echo "Invalid credentials!";
         }
+    } else {
+        echo "User not found!";
     }
 
-    echo 'fail';
+    $conn->close();
 }
 ?>
